@@ -104,23 +104,23 @@ class TicTacToe
         return "X"
       elsif (@board[win_combo[0]]) == "O" && (@board[win_combo[1]]) == "O" && (@board[win_combo[2]]) == "O"
         return "O"
-    else
-      nil
+      else
+        nil
+      end
     end
   end
-end
-end
+  end
 
 #play
-def play
-  while over? == false
-    turn
+  def play
+    while over? == false
+      turn
+    end
+    if won?
+      puts "Congratulations #{winner}!"
+    elsif draw?
+      puts "Cat's Game!"
+    end
   end
-  if won?
-    puts "Congratulations #{winner}!"
-  elsif draw?
-    puts "Cat's Game!"
-  end
-end
 
 end
