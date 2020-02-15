@@ -1,147 +1,186 @@
-class TicTacToe
-  def initialize(board = nil)
-    @board = board || Array.new(9, " ")
-  end
-end 
 
-# The "pipes" || = or. This is saying that if the board returns nil, return an empty array.  So, either display the current board, or a new one.
-
-# WIN_COMBINATIONS within the body of TicTacToe
 
 WIN_COMBINATIONS = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0,4,8],
-    [2,4,6]
-  ]
-  
-  #display_board: not the instance variable @board
-  
-    def display_board
-    puts " #{@board[0]} | #{@board[1]} | #{@board[2]} "
-    puts "-----------"
-    puts " #{@board[3]} | #{@board[4]} | #{@board[5]} "
-    puts "-----------"
-    puts " #{@board[6]} | #{@board[7]} | #{@board[8]} "
-  end
-  
-  # input_index
-  
-  def input_to_index(user_input)
-    user_input.to_i - 1
-  end
-  
-  # move: Note that we deleted the boar arguement, and added @ to board.  For instance, #move was move(board, position, char), but now board is intialized, so it is a characteristic of TicTacToe, no need to have it as an argument.  So, #move became simply move(position, char).
-  
-  
-  def move(position, char)
-    @board[position] = char
-  end
-# For #move to work, we need to position_taken and valid_move
-  def position_taken?(index_i)
-    ((@board[index_i] == "X") || (@board[index_i] == "O"))
-  end
+  [0,1,2],
+  [3,4,5],
+  [6,7,8],
+  [0,3,6],
+  [1,4,7],
+  [2,5,8],
+  [0,4,8],
+  [2,4,6]]
 
-  def valid_move?(index)
-    index.between?(0,8) && !position_taken?(index)
-  end
-  
 
-#turn_count
-  def turn_count
-    number_of_turns = 0
-    @board.each do |space|
+#OUTPUT BOARD
+def display_board(
+board = [" ", " ", " ", " ", " ", " ", " ", " ", " "])
+  puts 'display board'
+#board output
+puts " #{board[0]} | #{board[1]} | #{board[2]} "
+puts "-----------"
+puts " #{board[3]} | #{board[4]} | #{board[5]} "
+puts "-----------"
+puts " #{board[6]} | #{board[7]} | #{board[8]} "
+end
+
+#CHANGE INFO TO INTEGER
+def input_to_index(move)
+   index = move.to_i - 1
+   index
+end
+
+#MAKE TURN
+def turn(board)
+  puts "Please enter 1-9:"
+  #get the user input
+  user_input = gets.strip
+  #input to index
+  index = input_to_index(user_input)
+  token = current_player(board)
+  
+  #check for validation
+  if valid_move?(board,index)
+    puts 'valid move'
+    move(board, index, token)
+    display_board(board)
+   else
+    puts 'try again'
+    turn(board)
+  end
+  display_board(board)
+end
+
+#CHECK FOR EMPTY SPACE
+def position_taken?(board, index)
+  !(board[index].nil? || board[index] == " ")
+end
+
+#IS # CORRECT & SPACE EMPTY?
+def valid_move?(board, index)
+
+  if index.between?(0,8) && !position_taken?(board, index)
+      puts 'this is a valid move'
+    return true
+  else
+   return false
+  end
+end
+
+#COUNTER FOR PLAYER ASSESMENT
+def turn_count(board)
+  counter = 0
+  board.each do |space|
     if space == "X" || space == "O"
-        number_of_turns += 1
-    end
+      counter +=1
   end
-  return number_of_turns
+end
+return counter
+end
+
+#WHICH PLAYER IS THIS?
+def current_player(board)
+  if turn_count(board)%2 ==0
+    current_player = "X"
+  else
+    current_player = "O"
+end
+return current_player
+end
+
+
+#MAKE MOVE ON BOARD
+def move(board, index, token)
+  board[index] = token
+  play(board)
   
-#current_player
-  def current_player
-    if turn_count % 2 == 0
-    "X"
-    else
-    "O"
-  end
- 
-#turn 
-def turn
-    puts "Please enter 1-9:"
-    input = gets.strip
-    index = input_to_index(input)
-    char = current_player
-    if valid_move?(index)
-      move(index, char)
-      display_board
-    else
-      turn
-    end
 end
 
-#won?
-def won?
-  WIN_COMBINATIONS.detect do |win_combo|
-    if (@board[win_combo[0]]) == "X" && (@board[win_combo[1]]) == "X" && (@board[win_combo[2]]) == "X"
+
+
+
+
+#HAS ANYONE WON? return false if no. return win_combo if yes
+def won?(board)
+  WIN_COMBINATIONS.each do |win_combo|
+    #check for player 1 win
+    if check_win_combination?(board, 'X', win_combo)
       return win_combo
-    elsif (@board[win_combo[0]]) == "O" && (@board[win_combo[1]]) == "O" && (@board[win_combo[2]]) == "O"
+      #check for player 2 win
+    elsif check_win_combination?(board, 'O', win_combo)
       return win_combo
-    end
-      false
-  end
-end
-
-#full?
-def full?
-  @board.all?{|occupied| occupied != " "}
-end
-
-#draw
-def draw?
-  !(won?) && (full?)
-end
-
-#over?
-def over?
-  won? || full? || draw?
-end
-
-#winner?
-def winner
-  WIN_COMBINATIONS.detect do |win_combo|
-    if (@board[win_combo[0]]) == "X" && (@board[win_combo[1]]) == "X" && (@board[win_combo[2]]) == "X"
-      return "X"
-    elsif (@board[win_combo[0]]) == "O" && (@board[win_combo[1]]) == "O" && (@board[win_combo[2]]) == "O"
-      return "O"
     else
-      nil
+      return false
+    end
+  end
+end
+
+#CHECK WINNING COMBOS
+def check_win_combination?(board, player, win_combo)
+  win_combo.all? do |position|
+    board[position] == player
+  end
+end
+
+#IS BOARD FULL? 
+def full?(board)
+  if board.include?(' ') || board.include?('')
+    return false
+else
+    return true
+  end
+end
+
+#IS THERE A DRAW?
+def draw?(board)
+  if !won?(board) && full?(board)
+    return true
+  end
+end
+
+#HAS SOMETHING HAPPENED?
+def over?(board)
+  puts 'is it over?'
+  if won?(board) || draw?(board) || full?(board)
+    return true
+  else
+    puts 'no keep going'
+    return false
+  end
+end
+
+#WHO WON?
+def winner(board)
+  if !won?(board)
+    return nil
+  else WIN_COMBINATIONS.each do |win_combo|
+    if check_win_combination?(board, 'X', win_combo)
+      return 'X'
+    elsif check_win_combination?(board, 'O', win_combo)
+      return 'O'
     end
   end
 end
 end
 
-#play
-def play
-  while over? == false
-    turn
+
+def play(board)
+  until over?(board) == true || won?(board) != false
+  puts 'turn'
+    turn(board)
   end
-  if won?
-    puts "Congratulations #{winner}!"
-  elsif draw?
-    puts "Cat's Game!"
+  if winner(board)
+    puts "Congratulations!"
+  elsif draw?(board)
+    puts "Draw!"
+  else
+    return nil
   end
 end
 
-end
 
 
-#bin/tictactoe
-#require 'pry'
-#require_relative '../lib/tic_tac_toe.rb'
 
-#game = TicTacToe.new
-#game.play
+
+
+display_board(board)
+play(board)
